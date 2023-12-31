@@ -1,4 +1,4 @@
-# __init__.py
+# Initializes the package.
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy

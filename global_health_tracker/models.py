@@ -27,7 +27,7 @@ class Outbreak(db.Model):
     timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 
-# Each user can have multiple search entries with one-to-many relationships
+# Represents the user in the system
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True, nullable=False)
@@ -36,6 +36,7 @@ class User(db.Model, UserMixin):
     searches = db.relationship('Search', backref='user', lazy=True)
 
 
+# Represents a specific search made by the user
 class Search(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -44,3 +45,12 @@ class Search(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+# Represents a record of a user's search history.
+class UserSearchHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    country = db.Column(db.String(50), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"UserSearchHistory(user_id={self.user_id}, country={self.country}, timestamp={self.timestamp})"

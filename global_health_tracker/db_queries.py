@@ -23,10 +23,9 @@ def load_data_from_csv(csv_path='Outbreaks.csv'):
 
 
 # Gets disease outbreaks from the last 10 years
-def get_disease_outbreaks_last_10_years(country):
-    current_year = datetime.now.year
-    ten_years_ago = current_year - 10
-    return Outbreak.query.filter_by(country=country).filter(Outbreak.year >= ten_years_ago).all()
+def get_outbreaks_by_country(country, years=10):
+    current_year = datetime.now().year
+    return Outbreak.query.filter_by(country=country).filter(Outbreak.year >= current_year - years).all()
 
 
 # Gets past searches by User

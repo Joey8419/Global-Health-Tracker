@@ -1,3 +1,4 @@
+# Contains your route definitions and view functions.
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from global_health_tracker import app, db
