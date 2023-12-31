@@ -1,59 +1,35 @@
 # Handles user authentication functionality
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_user, logout_user, login_required, current_user
-from . import db
-from .models import User
-from .forms import RegisterForm, LoginForm, SearchForm
-from .db_queries import get_outbreaks_by_country, get_user_search_history, add_user_search_history
-from werkzeug.security import check_password_hash, generate_password_hash
-
-auth = Blueprint('auth', __name__)
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import Length, EqualTo, Email, DataRequired, ValidationError
+from global_health_tracker.models import User
 
 
-# Sample login route
-@auth.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            flash('Login successful!', 'success')
-            return redirect(url_for('views.home'))
-        else:
-            flash('Login unsuccessful. Please check email and password.', 'danger')
-
-    return render_template('login.html', form=form)
+def validate_username(username_to_check):
+    user = User.query.filter_by(username=username_to_check.data).first()
+    if user:
+        raise ValidationError('Username already exists! Please try a different username')
 
 
-# Sample logout route
-@auth.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('views.home'))
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[Length(min=2, max=30), DataRequired()])
+    email_address = StringField('Email Address', validators=[Email(), DataRequired()])
+    password1 = PasswordField('Password', validators=[Length(min=6), DataRequired()])
+    password2 = PasswordField('Confirm Password', validators=[EqualTo('password1'), DataRequired()])
+    submit = SubmitField('Create Account')
+
+    def validate_email_address(self, email_address_to_check):
+        email_address = User.query.filter_by(email_address=email_address_to_check.data).first()
+        if email_address:
+            raise ValidationError('Email Address already exists! Please try a different email address')
 
 
-# Sample register route
-@auth.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Sign In')
 
-    form = RegisterForm()
-    if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = User(email=form.email.data, password=hashed_password, first_name=form.first_name.data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created successfully!', 'success')
-        login_user(new_user)
-        return redirect(url_for('views.home'))
 
-    return render_template('register.html', form=form)
-
-# Add more routes for other authentication-related functionalities if needed
+class SearchForm(FlaskForm):
+    country = StringField('Country', validators=[DataRequired()])
+    submit = SubmitField('Search')

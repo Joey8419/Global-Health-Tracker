@@ -1,11 +1,8 @@
 # __init__.py
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
-import pandas as pd
+from flask_login import LoginManager
 
 # This is how flask is initialized; __name__ represents the name of the file that was run:
 app = Flask(__name__)
